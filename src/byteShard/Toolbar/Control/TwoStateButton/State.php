@@ -42,7 +42,7 @@ class State
      * @return bool
      * @throws Exception
      */
-    public function getState(int $userId = null): bool
+    public function getState(?int $userId = null): bool
     {
         if ($userId === null) {
             $userId = Session::getUserId();
@@ -74,7 +74,7 @@ class State
      * @throws Exception
      * @internal
      */
-    public function storeState(bool $state, int $userId = null): void
+    public function storeState(bool $state, ?int $userId = null): void
     {
         if ($userId === null) {
             $userId = Session::getUserId();
