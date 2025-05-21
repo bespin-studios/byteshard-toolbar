@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.0...v2.0.1) (2025-05-21)
+
+
+### Bug Fixes
+
+* pipeline and php 8.4 warnings ([5cd6b5d](https://github.com/bespin-studios/byteshard-toolbar/commit/5cd6b5d5b577d05be21aae3c68c0c1e19168e4ff))
+
 # [2.0.0](https://github.com/byteshard/toolbar/compare/v1.0.0...v2.0.0) (2024-07-08)
 
 
