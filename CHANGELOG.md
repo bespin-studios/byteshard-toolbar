@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.1...v2.0.2) (2025-07-10)
+
+
+### Bug Fixes
+
+* update toolbar to use new frontend notation ([75e8610](https://github.com/bespin-studios/byteshard-toolbar/commit/75e86105b9534d908a0bd9dbe78a9d835c8e0188))
+
 ## [2.0.1](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.0...v2.0.1) (2025-05-21)
 
 
