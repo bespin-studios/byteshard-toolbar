@@ -9,6 +9,9 @@ namespace byteShard;
 use byteShard\Enum;
 use byteShard\Internal\Permission\PermissionImplementation;
 use byteShard\Internal\SimpleXML;
+use byteShard\Internal\Struct\ClientCellComponent;
+use byteShard\Internal\Struct\ClientCellEvent;
+use byteShard\Internal\Struct\UiComponentInterface;
 use byteShard\Internal\Toolbar\ToolbarContainer;
 use byteShard\Internal\Toolbar\ToolbarObject;
 use byteShard\Toolbar\Control\ButtonWithList;
@@ -64,6 +67,7 @@ class Toolbar implements ToolbarInterface
      */
     public function getContents(): array
     {
+        trigger_error('Toolbar::getContents has been deprecated in favour of getComponent', E_USER_DEPRECATED);
         if ($this->getAccessType() > Enum\AccessType::NONE && !empty($this->toolbarObjects)) {
             $this->evaluateToolbarObjects();
             return [
@@ -76,6 +80,21 @@ class Toolbar implements ToolbarInterface
         } else {
             return ['toolbar' => false];
         }
+    }
+
+    public function getComponent(): ?UiComponentInterface
+    {
+        if ($this->getAccessType() > Enum\AccessType::NONE && !empty($this->toolbarObjects)) {
+            $this->evaluateToolbarObjects();
+            return new ClientCellComponent(
+                type   : Enum\ContentType::DhtmlxToolbar,
+                content: $this->getXML(),
+                events : $this->getToolbarEvents(),
+                pre    : $this->getToolbarParameters(),
+                post   : $this->getAdvancedControls()
+            );
+        }
+        return null;
     }
 
     private function getAdvancedControls(): array
@@ -211,24 +230,24 @@ class Toolbar implements ToolbarInterface
         //TODO: implement unrestricted access. Not necessary if getAccessType will be used instead
         if ($this->getAccessType() === Enum\AccessType::RW) {
             if ($this->eventOnClick === true) {
-                $toolbarEvents['onClick'][] = 'doOnClick';
+                $toolbarEvents[] = new ClientCellEvent('onClick', 'doOnClick');
             }
             if ($this->eventOnEnter === true) {
-                $toolbarEvents['onEnter'][] = 'doOnEnter';
+                $toolbarEvents[] = new ClientCellEvent('onEnter', 'doOnEnter');
             }
             if ($this->eventOnStateChange === true) {
-                $toolbarEvents['onStateChange'][] = 'doOnStateChange';
+                $toolbarEvents[] = new ClientCellEvent('onStateChange', 'doOnStateChange');
             }
             if ($this->eventOnValueChange === true) {
-                $toolbarEvents['onValueChange'][] = 'doOnValueChange';
+                $toolbarEvents[] = new ClientCellEvent('onValueChange', 'doOnValueChange');
             }
         } elseif ($this->getAccessType() === Enum\AccessType::R) {
-            $toolbarEvents['onStateChange'][] = 'doOnStateChange';
-            $toolbarEvents['onClick'][]       = 'doOnClick';
-            $toolbarEvents['onEnter'][]       = 'doOnEnter';
+            $toolbarEvents[] = new ClientCellEvent('onStateChange', 'doOnStateChange');
+            $toolbarEvents[] = new ClientCellEvent('onClick', 'doOnClick');
+            $toolbarEvents[] = new ClientCellEvent('onEnter', 'doOnEnter');
         }
         if ($toolbarEvents === null && ($this->container instanceof Tab)) {
-            $toolbarEvents['onClick'][] = 'doOnClick';
+            $toolbarEvents[] = new ClientCellEvent('onClick', 'doOnClick');
         }
         return $toolbarEvents;
     }
