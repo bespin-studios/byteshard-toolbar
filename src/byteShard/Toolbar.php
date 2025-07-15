@@ -9,8 +9,8 @@ namespace byteShard;
 use byteShard\Enum;
 use byteShard\Internal\Permission\PermissionImplementation;
 use byteShard\Internal\SimpleXML;
-use byteShard\Internal\Struct\ClientCellComponent;
 use byteShard\Internal\Struct\ClientCellEvent;
+use byteShard\Internal\Struct\ContentComponent;
 use byteShard\Internal\Struct\UiComponentInterface;
 use byteShard\Internal\Toolbar\ToolbarContainer;
 use byteShard\Internal\Toolbar\ToolbarObject;
@@ -86,12 +86,12 @@ class Toolbar implements ToolbarInterface
     {
         if ($this->getAccessType() > Enum\AccessType::NONE && !empty($this->toolbarObjects)) {
             $this->evaluateToolbarObjects();
-            return new ClientCellComponent(
+            return new ContentComponent(
                 type   : Enum\ContentType::DhtmlxToolbar,
                 content: $this->getXML(),
                 events : $this->getToolbarEvents(),
-                pre    : $this->getToolbarParameters(),
-                post   : $this->getAdvancedControls()
+                setup  : $this->getToolbarParameters(),
+                update : $this->getAdvancedControls()
             );
         }
         return null;
