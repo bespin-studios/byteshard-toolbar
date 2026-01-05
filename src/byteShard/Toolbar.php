@@ -6,30 +6,28 @@
 
 namespace byteShard;
 
-use byteShard\Enum;
 use byteShard\Internal\Permission\PermissionImplementation;
 use byteShard\Internal\SimpleXML;
 use byteShard\Internal\Struct\ClientCellEvent;
 use byteShard\Internal\Struct\ContentComponent;
 use byteShard\Internal\Struct\UiComponentInterface;
+use byteShard\Internal\Toolbar\ToolbarClassInterface;
 use byteShard\Internal\Toolbar\ToolbarContainer;
 use byteShard\Internal\Toolbar\ToolbarObject;
 use byteShard\Toolbar\Control\ButtonWithList;
 use byteShard\Toolbar\Control\Calendar;
-use byteShard\Toolbar\ToolbarInterface;
 use byteShard\Toolbar\ToolbarObjectInterface;
 use SimpleXMLElement;
 
 /**
  * Class Toolbar
  */
-class Toolbar implements ToolbarInterface
+class Toolbar implements ToolbarClassInterface
 {
     use PermissionImplementation {
         setAccessType as setToolbarAccessType;
     }
 
-    private ToolbarContainer $container;
     /** @var ToolbarObject[] */
     private array  $toolbarObjects = [];
     private array  $lists          = [];
@@ -47,17 +45,9 @@ class Toolbar implements ToolbarInterface
      * @param ToolbarContainer $container
      * @throws Exception
      */
-    public function __construct(ToolbarContainer $container)
+    public function __construct(private readonly ToolbarContainer $container)
     {
-        $this->container = $container;
         $this->setParentAccessType($container->getAccessType());
-        if ($container instanceof Tab) {
-            // TODO: if method exists else exception
-            // don't abstract that function as it only applies to Tab\Toolbars and not Cell\Toolbars
-            if (method_exists($this, 'defineToolbarContent')) {
-                $this->defineToolbarContent();
-            }
-        }
     }
 
     /**
@@ -110,7 +100,7 @@ class Toolbar implements ToolbarInterface
         return $result;
     }
 
-    public function addToolbarObject(ToolbarObjectInterface ...$toolbarObjects): self
+    public function addToolbarObject(ToolbarObjectInterface ...$toolbarObjects): static
     {
         foreach ($toolbarObjects as $toolbarObject) {
             if ($toolbarObject instanceof ToolbarObject) {
@@ -137,18 +127,10 @@ class Toolbar implements ToolbarInterface
     private function evaluateToolbarObject(ToolbarObject $toolbarObject): void
     {
         $toolbarObject->setParentAccessType($this->getAccessType());
-        $nonce = '';
-        if ($this->container instanceof Cell) {
-            $toolbarObject->setBaseLocale($this->container->createLocaleBaseToken('Cell'));
-            $nonce = $this->container->getNonce();
-        } elseif ($this->container instanceof Tab) {
-            //TODO: tab nonce
-            $toolbarObject->setBaseLocale($this->container->getToolbarName());
-        }
+        $toolbarObject->setBaseLocale($this->container->getScopeLocaleTokenBasedOnNamespace());
+        $nonce = $this->container->getNonce();
 
         if ($toolbarObject->hasEvents() === true && $toolbarObject->getAccessType() === Enum\AccessType::RW) {
-            //TODO: don't register event and ID in session if the event doesn't have any actions assigned to it
-            // set Events only for objects which can be accessed by user
             $name        = $toolbarObject->getToolbarObjectName();
             $objectNonce = substr(md5($nonce.$name), 0, 24);
 
@@ -165,9 +147,8 @@ class Toolbar implements ToolbarInterface
             ];
             $encryptedName = Session::encrypt(json_encode($encrypted), $objectNonce);
             $eventName     = '';
-            if ((($this->container instanceof Cell) || ($this->container instanceof Tab)) && $name !== 'event_onClick_xlsExportThisCell') {
-                $tmp       = $this->container->getEventIDForInteractiveObject($name, true, $encryptedName);
-                $eventName = $tmp['name'];
+            if ($name !== 'event_onClick_xlsExportThisCell') {
+                $eventName = $encryptedName;
                 $toolbarObject->setEventName($eventName);
             }
             if ($toolbarObject instanceof ButtonWithList) {
@@ -178,42 +159,26 @@ class Toolbar implements ToolbarInterface
             }
             $tmpEvents = $toolbarObject->getEvents();
             foreach ($tmpEvents as $event) {
-                $actions = $event->getActionArray();
-                if ($this->container instanceof Cell) {
-                    foreach ($actions as $action) {
-                        $action->initActionInCell($this->container);
-                    }
-                } elseif ($this->container instanceof Tab) {
-                    foreach ($actions as $action) {
-                        $action->initActionInTab($this->container);
-                    }
-                }
-                $valid = false;
                 if ($event instanceof Toolbar\Event\OnClick) {
-                    $valid = true;
                     if ($this->eventOnClick === false) {
                         $this->eventOnClick = true;
                     }
                 } elseif ($event instanceof Toolbar\Event\OnEnter) {
-                    $valid = true;
                     if ($this->eventOnEnter === false) {
                         $this->eventOnEnter = true;
                     }
                 } elseif ($event instanceof Toolbar\Event\OnStateChange) {
-                    $valid = true;
                     if ($this->eventOnStateChange === false) {
                         $this->eventOnStateChange = true;
                     }
                 } elseif ($event instanceof Toolbar\Event\OnValueChange) {
-                    $valid = true;
                     if ($this->eventOnValueChange === false) {
                         $this->eventOnValueChange = true;
                     }
                 }
-                if ($valid === true && $eventName !== '' && (($this->container instanceof Cell) || ($this->container instanceof Tab))) {
-                    $this->container->setEventForInteractiveObject($name, $event);
-                }
             }
+        } else {
+            $toolbarObject->setEventName(base64_encode(ID::UUID()));
         }
         if (property_exists($toolbarObject, 'nestedItems')) {
             foreach ($toolbarObject->nestedItems as $nestedObject) {
@@ -225,29 +190,17 @@ class Toolbar implements ToolbarInterface
     private function getToolbarEvents(): array
     {
         $toolbarEvents = [];
-        //TODO: why set some events when parent_access_type is readonly?
-        //Why test parent access type? Should be this->getAccessType()
-        //TODO: implement unrestricted access. Not necessary if getAccessType will be used instead
-        if ($this->getAccessType() === Enum\AccessType::RW) {
-            if ($this->eventOnClick === true) {
-                $toolbarEvents[] = new ClientCellEvent('onClick', 'doOnClick');
-            }
-            if ($this->eventOnEnter === true) {
-                $toolbarEvents[] = new ClientCellEvent('onEnter', 'doOnEnter');
-            }
-            if ($this->eventOnStateChange === true) {
-                $toolbarEvents[] = new ClientCellEvent('onStateChange', 'doOnStateChange');
-            }
-            if ($this->eventOnValueChange === true) {
-                $toolbarEvents[] = new ClientCellEvent('onValueChange', 'doOnValueChange');
-            }
-        } elseif ($this->getAccessType() === Enum\AccessType::R) {
-            $toolbarEvents[] = new ClientCellEvent('onStateChange', 'doOnStateChange');
+        if ($this->eventOnClick === true) {
             $toolbarEvents[] = new ClientCellEvent('onClick', 'doOnClick');
+        }
+        if ($this->eventOnEnter === true) {
             $toolbarEvents[] = new ClientCellEvent('onEnter', 'doOnEnter');
         }
-        if ($toolbarEvents === null && ($this->container instanceof Tab)) {
-            $toolbarEvents[] = new ClientCellEvent('onClick', 'doOnClick');
+        if ($this->eventOnStateChange === true) {
+            $toolbarEvents[] = new ClientCellEvent('onStateChange', 'doOnStateChange');
+        }
+        if ($this->eventOnValueChange === true) {
+            $toolbarEvents[] = new ClientCellEvent('onValueChange', 'doOnValueChange');
         }
         return $toolbarEvents;
     }
