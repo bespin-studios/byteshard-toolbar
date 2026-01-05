@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.3...v2.0.4) (2026-01-05)
+
+
+### Bug Fixes
+
+* use new action format ([fe00ea0](https://github.com/bespin-studios/byteshard-toolbar/commit/fe00ea07240ad4f822acbf6ce4298de49f3394ad))
+
 ## [2.0.3](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.2...v2.0.3) (2025-07-15)
 
 
