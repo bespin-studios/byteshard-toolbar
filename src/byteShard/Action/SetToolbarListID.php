@@ -26,12 +26,10 @@ class SetToolbarListID extends Action implements Action\ControlIdInterface
      */
     public function __construct(string ...$cells)
     {
-        parent::__construct();
         foreach ($cells as $cell) {
             $cell_name               = Cell::getContentCellName($cell);
             $this->cells[$cell_name] = $cell_name;
         }
-        $this->addUniqueID($this->cells);
     }
 
     /**
@@ -46,7 +44,7 @@ class SetToolbarListID extends Action implements Action\ControlIdInterface
 
     protected function runAction(): ActionResultInterface
     {
-        $container = $this->getLegacyContainer();
+        $container = $this->getActionInitDTO()->cell;
         if ($container instanceof Cell) {
             $clientData = $this->getClientData();
             $listId     = $clientData?->{$this->controlId} ?? null;
