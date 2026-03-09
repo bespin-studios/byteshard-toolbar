@@ -1,3 +1,10 @@
+## [2.0.5](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.4...v2.0.5) (2026-03-09)
+
+
+### Bug Fixes
+
+* remove deprecated methods from actions ([8792c7f](https://github.com/bespin-studios/byteshard-toolbar/commit/8792c7f84316ef66555d1552d25214ce8e57c205))
+
 ## [2.0.4](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.3...v2.0.4) (2026-01-05)
 
 
