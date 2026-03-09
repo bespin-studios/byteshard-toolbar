@@ -18,7 +18,6 @@ abstract class ModifyToolbarControl extends Action
 
     public function __construct(string $cell, string $modification, string ...$controls)
     {
-        parent::__construct();
         $this->cell         = Cell::getContentCellName($cell);
         $this->modification = $modification;
         foreach ($controls as $control) {
@@ -26,7 +25,6 @@ abstract class ModifyToolbarControl extends Action
                 $this->controls[$control] = $control;
             }
         }
-        $this->addUniqueID($this->cell, $this->controls);
     }
 
     protected function runAction(): ActionResultInterface

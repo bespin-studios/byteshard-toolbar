@@ -29,7 +29,6 @@ class ToggleState extends Action
      */
     public function __construct(State $state)
     {
-        parent::__construct();
         $this->state = $state;
     }
 
