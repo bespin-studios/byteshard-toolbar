@@ -6,6 +6,7 @@
 
 namespace byteShard\Toolbar\Control;
 
+use byteShard\Enum\Cast;
 use byteShard\Internal\Config;
 use byteShard\Internal\Toolbar;
 
@@ -21,7 +22,8 @@ class TwoStateButton extends Toolbar\ToolbarObject
     use Toolbar\Text;
     use Toolbar\Tooltip;
 
-    protected string $type = 'buttonTwoState';
+    protected string       $type = 'buttonTwoState';
+    protected static ?Cast $cast = Cast::BOOL;
 
     public function __construct(string $id)
     {

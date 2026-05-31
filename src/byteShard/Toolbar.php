@@ -145,6 +145,10 @@ class Toolbar implements ToolbarClassInterface
                 'a' => $toolbarObject->getAccessType(),
                 't' => $toolbarObjectClass
             ];
+            $cast = $toolbarObject->getCast();
+            if ($cast !== null) {
+                $encrypted['c'] = $cast;
+            }
             $encryptedName = Session::encrypt(json_encode($encrypted), $objectNonce);
             $eventName     = '';
             if ($name !== 'event_onClick_xlsExportThisCell') {
