@@ -1,3 +1,10 @@
+## [2.0.6](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.5...v2.0.6) (2026-05-31)
+
+
+### Bug Fixes
+
+* two state button state cast to bool ([c49cee6](https://github.com/bespin-studios/byteshard-toolbar/commit/c49cee6eeea204d96cc41981c9bcaed6df20205a))
+
 ## [2.0.5](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.4...v2.0.5) (2026-03-09)
 
 
