@@ -24,6 +24,7 @@ abstract class ToolbarObject implements ToolbarObjectInterface
 
     /** @var string override the type in each control type */
     protected string $type;
+    protected static ?Enum\Cast $cast = null;
     private string   $id;
     private string   $baseLocale = '';
     /** @var Event[] */
@@ -39,6 +40,11 @@ abstract class ToolbarObject implements ToolbarObjectInterface
     public function hasEvents(): bool
     {
         return !empty($this->events);
+    }
+
+    public function getCast(): ?Enum\Cast
+    {
+        return static::$cast;
     }
 
     /**
