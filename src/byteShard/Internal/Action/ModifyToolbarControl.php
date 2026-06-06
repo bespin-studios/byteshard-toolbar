@@ -8,6 +8,7 @@ namespace byteShard\Internal\Action;
 
 use byteShard\Cell;
 use byteShard\Internal\Action;
+use byteShard\Session;
 
 abstract class ModifyToolbarControl extends Action
 {
@@ -31,11 +32,12 @@ abstract class ModifyToolbarControl extends Action
     {
         $cells = $this->getCells([$this->cell]);
         foreach ($cells as $cell) {
-            foreach ($this->controls as $control) {
-                $controlId = $cell->getEventNameForID($control);
-                if ($controlId !== '') {
-                    $action['tb'][$cell->containerId()][$cell->cellId()]['m'][$controlId][$this->modification] = $this->modificationValue;
-                }
+            $containerClass = $cell->getContentClass();
+            foreach ($this->controls as $name) {
+                $controlId = Session::encrypt(
+                    message: json_encode(['i' => $name]),
+                    nonce  : substr(md5(ltrim($containerClass, '\\').$name), 0, 24));
+                $action['tb'][$cell->containerId()][$cell->cellId()]['m'][$controlId][$this->modification] = $this->modificationValue;
             }
         }
         $action['state'] = 2;

@@ -31,6 +31,7 @@ class Toolbar implements ToolbarClassInterface
     /** @var ToolbarObject[] */
     private array  $toolbarObjects = [];
     private array  $lists          = [];
+    private array  $controls       = [];
     private string $outputCharset  = 'utf-8';
     private string $exportId;
 
@@ -131,8 +132,7 @@ class Toolbar implements ToolbarClassInterface
         $nonce = $this->container->getNonce();
 
         if ($toolbarObject->hasEvents() === true && $toolbarObject->getAccessType() === Enum\AccessType::RW) {
-            $name        = $toolbarObject->getToolbarObjectName();
-            $objectNonce = substr(md5($nonce.$name), 0, 24);
+            $name = $toolbarObject->getToolbarObjectName();
 
             $toolbarObjectClass = $toolbarObject::class;
             // abbreviate framework controls to keep object ids as short as possible
@@ -140,16 +140,18 @@ class Toolbar implements ToolbarClassInterface
                 $toolbarObjectClass = '!t'.substr($toolbarObjectClass, 26);
             }
 
-            $encrypted     = [
-                'i' => $name,
+            $this->controls[$name] = [
                 'a' => $toolbarObject->getAccessType(),
                 't' => $toolbarObjectClass
             ];
-            $cast = $toolbarObject->getCast();
+            $cast                  = $toolbarObject::getCast();
             if ($cast !== null) {
-                $encrypted['c'] = $cast;
+                $this->controls[$name]['c'] = $cast;
             }
-            $encryptedName = Session::encrypt(json_encode($encrypted), $objectNonce);
+
+            $encryptedName = Session::encrypt(
+                message: json_encode(['i' => $name]),
+                nonce  : substr(md5($this->container::class.$name), 0, 24));
             $eventName     = '';
             if ($name !== 'event_onClick_xlsExportThisCell') {
                 $eventName = $encryptedName;
@@ -214,6 +216,13 @@ class Toolbar implements ToolbarClassInterface
         $parameters = [];
         if (!empty($this->lists)) {
             $parameters['lists'] = $this->lists;
+        }
+        if (!empty($this->controls)) {
+            if (extension_loaded('zlib') === true) {
+                $parameters['op'] = Session::encrypt(gzcompress(json_encode($this->controls), 9), $this->container->getNonce());
+            } else {
+                $parameters['op'] = Session::encrypt(json_encode($this->controls), $this->container->getNonce());
+            }
         }
         return $parameters;
     }
