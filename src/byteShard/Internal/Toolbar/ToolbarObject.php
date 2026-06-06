@@ -42,7 +42,7 @@ abstract class ToolbarObject implements ToolbarObjectInterface
         return !empty($this->events);
     }
 
-    public function getCast(): ?Enum\Cast
+    public static function getCast(): ?Enum\Cast
     {
         return static::$cast;
     }
