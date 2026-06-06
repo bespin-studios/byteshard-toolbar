@@ -1,3 +1,10 @@
+## [2.0.7](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.6...v2.0.7) (2026-06-06)
+
+
+### Bug Fixes
+
+* toolbar encrypted name to exclude object parameters and instead put them in separate payload ([5d00ac6](https://github.com/bespin-studios/byteshard-toolbar/commit/5d00ac63135c0ce44e1154f97531d1f786c5a601))
+
 ## [2.0.6](https://github.com/bespin-studios/byteshard-toolbar/compare/v2.0.5...v2.0.6) (2026-05-31)
 
 
